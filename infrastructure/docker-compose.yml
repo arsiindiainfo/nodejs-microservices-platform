@@ -1,0 +1,234 @@
+name: nodejs-microservices-platform
+
+x-jwt-env: &jwt-env
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-only-shared-hs256-secret-change-me}
+  JWT_ACCESS_EXPIRES_IN: 15m
+
+x-aws-env: &aws-env
+  AWS_REGION: us-east-1
+  AWS_ENDPOINT_URL: http://localstack:4566
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: demotech-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-DemoTech!Order2026}
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mysql:
+    image: mysql:8
+    container_name: demotech-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-DemoTech!Payment2026}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-payment_service}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  mongo:
+    image: mongo:7
+    container_name: demotech-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-demotech}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-DemoTech!Mongo2026}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    container_name: demotech-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  localstack:
+    image: localstack/localstack:3
+    container_name: demotech-localstack
+    environment:
+      SERVICES: sns,sqs,lambda
+      DEBUG: 0
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - ./localstack-init:/etc/localstack/init/ready.d
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # SQL Server has no "create database from an env var" equivalent (unlike
+  # MySQL/Mongo) — this one-shot job creates order_service, then exits.
+  mssql-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: demotech-mssql-init
+    depends_on:
+      mssql:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-DemoTech!Order2026}
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S mssql -U sa -P "$$MSSQL_SA_PASSWORD" -C \
+          -Q "IF DB_ID('order_service') IS NULL CREATE DATABASE order_service"
+
+  gateway:
+    build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: gateway } }
+    container_name: demotech-gateway
+    depends_on: [redis, auth-service, user-service, product-service, order-service, payment-service, notification-service]
+    ports: ["3000:3000"]
+    environment:
+      <<: *jwt-env
+      PORT: 3000
+      REDIS_HOST: redis
+      CORS_ORIGIN: http://localhost:5173
+      AUTH_SERVICE_HOST: auth-service
+      USER_SERVICE_HOST: user-service
+      PRODUCT_SERVICE_HOST: product-service
+      ORDER_SERVICE_HOST: order-service
+      PAYMENT_SERVICE_HOST: payment-service
+      NOTIFICATION_SERVICE_HOST: notification-service
+
+  auth-service:
+    build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: auth-service } }
+    container_name: demotech-auth-service
+    depends_on: [redis, user-service]
+    environment:
+      <<: *jwt-env
+      PORT: 3001
+      TCP_PORT: 4001
+      REDIS_HOST: redis
+      USER_SERVICE_HOST: user-service
+
+  user-service:
+    build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: user-service } }
+    container_name: demotech-user-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      <<: *jwt-env
+      PORT: 3002
+      TCP_PORT: 4002
+      MONGO_URI: mongodb://demotech:${MONGO_ROOT_PASSWORD:-DemoTech!Mongo2026}@mongo:27017/user_service?authSource=admin
+
+  product-service:
+    build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: product-service } }
+    container_name: demotech-product-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      <<: *jwt-env
+      PORT: 3003
+      TCP_PORT: 4003
+      MONGO_URI: mongodb://demotech:${MONGO_ROOT_PASSWORD:-DemoTech!Mongo2026}@mongo:27017/product_service?authSource=admin
+      ORDER_SERVICE_HOST: order-service
+
+  order-service:
+    build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: order-service } }
+    container_name: demotech-order-service
+    depends_on:
+      mssql-init:
+        condition: service_completed_successfully
+      localstack:
+        condition: service_healthy
+    environment:
+      <<: [*jwt-env, *aws-env]
+      PORT: 3004
+      TCP_PORT: 4004
+      MSSQL_HOST: mssql
+      MSSQL_USER: sa
+      MSSQL_PASSWORD: ${MSSQL_SA_PASSWORD:-DemoTech!Order2026}
+      MSSQL_DATABASE: order_service
+      PRODUCT_SERVICE_HOST: product-service
+      SNS_ORDER_EVENTS_TOPIC_ARN: arn:aws:sns:us-east-1:000000000000:order-events
+      ORDER_SVC_PAYMENT_QUEUE_URL: http://localstack:4566/000000000000/order-svc-payment-queue
+
+  payment-service:
+    build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: payment-service } }
+    container_name: demotech-payment-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      <<: [*jwt-env, *aws-env]
+      PORT: 3005
+      TCP_PORT: 4005
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-DemoTech!Payment2026}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-payment_service}
+      SNS_PAYMENT_EVENTS_TOPIC_ARN: arn:aws:sns:us-east-1:000000000000:payment-events
+      PAYMENT_SVC_ORDER_QUEUE_URL: http://localstack:4566/000000000000/payment-svc-order-queue
+
+  notification-service:
+    build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: notification-service } }
+    container_name: demotech-notification-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      order-service:
+        condition: service_started
+    environment:
+      <<: [*jwt-env, *aws-env]
+      PORT: 3006
+      TCP_PORT: 4006
+      MONGO_URI: mongodb://demotech:${MONGO_ROOT_PASSWORD:-DemoTech!Mongo2026}@mongo:27017/notification_service?authSource=admin
+      ORDER_SERVICE_HOST: order-service
+      NOTIFICATION_SVC_ORDER_QUEUE_URL: http://localstack:4566/000000000000/notification-svc-order-queue
+      NOTIFICATION_SVC_PAYMENT_QUEUE_URL: http://localstack:4566/000000000000/notification-svc-payment-queue
+
+volumes:
+  mssql-data:
+  mysql-data:
+  mongo-data:
+  redis-data:
+  localstack-data:
