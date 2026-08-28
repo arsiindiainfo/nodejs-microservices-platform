@@ -31,10 +31,10 @@ export class OrderOutboxPublisherService extends OutboxPublisherBase {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const claimed: ClaimedRow[] = await queryRunner.query(
+      const claimed = (await queryRunner.query(
         'EXEC dbo.usp_OutboxEvent_ClaimBatch @BatchSize = @0',
         [20],
-      );
+      )) as ClaimedRow[];
 
       for (const row of claimed) {
         const envelope = wrapEvent(

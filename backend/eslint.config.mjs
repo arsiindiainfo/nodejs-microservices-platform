@@ -32,4 +32,18 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  {
+    // e2e specs live under apps/*/test/, outside every app's tsconfig.app.json
+    // "include" — typescript-eslint's project service falls back to a
+    // default (non-full-program) project for them, so `supertest`'s chained
+    // methods resolve as untyped. Not a real bug in these files; relax the
+    // type-aware rules here rather than fight the monorepo's tsconfig shape.
+    files: ['**/test/**/*.e2e-spec.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
 );

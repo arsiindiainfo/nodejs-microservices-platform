@@ -13,7 +13,11 @@ import { OutboxModule } from './outbox/outbox.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validationSchema: envSchema }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envSchema,
+      envFilePath: 'apps/order-service/.env',
+    }),
     JwtCommonModule,
     HealthModule,
     OrdersModule,

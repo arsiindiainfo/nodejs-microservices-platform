@@ -41,9 +41,9 @@ export class PaymentsRepository {
         'CALL sp_payment_process(?, ?, ?, @p_status, @p_status_code, @p_message)',
         [eventId, orderId, amount],
       );
-      const rows = await queryRunner.query(
+      const rows = (await queryRunner.query(
         'SELECT @p_status AS status, @p_status_code AS statusCode, @p_message AS message',
-      );
+      )) as ProcessPaymentResult[];
       return rows[0];
     } finally {
       await queryRunner.release();
@@ -51,11 +51,11 @@ export class PaymentsRepository {
   }
 
   async findByOrderId(orderId: number): Promise<RawPaymentRow | undefined> {
-    const rows = await this.dataSource.query(
+    // mysql2 returns [rows, outputParams] for a CALL with no session-var outputs; the proc's own SELECT is rows[0].
+    const rows = await this.dataSource.query<[RawPaymentRow[], unknown]>(
       'CALL sp_payment_get_by_order(?)',
       [orderId],
     );
-    // mysql2 returns [rows, outputParams] for a CALL with no session-var outputs; the proc's own SELECT is rows[0].
-    return (rows[0] as RawPaymentRow[])[0];
+    return rows[0][0];
   }
 }

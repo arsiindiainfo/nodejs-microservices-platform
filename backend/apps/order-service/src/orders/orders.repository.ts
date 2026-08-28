@@ -39,6 +39,17 @@ export interface ListOrdersParams {
   sortDirection: string;
 }
 
+interface CreateOrderRow {
+  OrderId: number;
+  StatusCode: string;
+  Message: string;
+}
+
+interface StatusCodeRow {
+  StatusCode: string;
+  Message: string;
+}
+
 /**
  * The only layer touching SQL Server (§5) — every call goes through a §10
  * stored procedure. OUTPUT parameters are captured by declaring local
@@ -54,7 +65,7 @@ export class OrdersRepository {
     customerId: string,
     items: CreateOrderItemInput[],
   ): Promise<StoredProcResult & { orderId: number }> {
-    const rows = await this.dataSource.query(
+    const rows = await this.dataSource.query<CreateOrderRow[]>(
       `DECLARE @OrderId BIGINT, @StatusCode VARCHAR(30), @Message VARCHAR(255);
        EXEC dbo.usp_Order_Create @CustomerId = @0, @ItemsJson = @1,
          @OrderId = @OrderId OUTPUT, @StatusCode = @StatusCode OUTPUT, @Message = @Message OUTPUT;
@@ -81,7 +92,7 @@ export class OrdersRepository {
     orderId: number,
     outcome: 'SUCCEEDED' | 'FAILED',
   ): Promise<StoredProcResult> {
-    const rows = await this.dataSource.query(
+    const rows = await this.dataSource.query<StatusCodeRow[]>(
       `DECLARE @StatusCode VARCHAR(30), @Message VARCHAR(255);
        EXEC dbo.usp_Order_ApplyPaymentResult @EventId = @0, @OrderId = @1, @Outcome = @2,
          @StatusCode = @StatusCode OUTPUT, @Message = @Message OUTPUT;
@@ -95,7 +106,7 @@ export class OrdersRepository {
     orderId: number,
     customerId: string | null,
   ): Promise<StoredProcResult> {
-    const rows = await this.dataSource.query(
+    const rows = await this.dataSource.query<StatusCodeRow[]>(
       `DECLARE @StatusCode VARCHAR(30), @Message VARCHAR(255);
        EXEC dbo.usp_Order_Cancel @OrderId = @0, @CustomerId = @1,
          @StatusCode = @StatusCode OUTPUT, @Message = @Message OUTPUT;
@@ -106,7 +117,7 @@ export class OrdersRepository {
   }
 
   async getById(orderId: number): Promise<RawOrderDetailRow | undefined> {
-    const rows = await this.dataSource.query(
+    const rows = await this.dataSource.query<RawOrderDetailRow[]>(
       'EXEC dbo.usp_Order_GetById @OrderId = @0',
       [orderId],
     );
@@ -114,7 +125,9 @@ export class OrdersRepository {
   }
 
   async getCustomerId(orderId: number): Promise<string | undefined> {
-    const rows = await this.dataSource.query(
+    const rows = await this.dataSource.query<
+      Array<{ CustomerId: string | null }>
+    >(
       `DECLARE @CustomerId UNIQUEIDENTIFIER;
        EXEC dbo.usp_Order_GetCustomerId @OrderId = @0, @CustomerId = @CustomerId OUTPUT;
        SELECT @CustomerId AS CustomerId;`,
@@ -124,7 +137,9 @@ export class OrdersRepository {
   }
 
   async productHasNonTerminalOrder(productId: string): Promise<boolean> {
-    const rows = await this.dataSource.query(
+    const rows = await this.dataSource.query<
+      Array<{ Result: boolean | number }>
+    >(
       `DECLARE @Result BIT;
        EXEC dbo.usp_Order_ProductHasNonTerminalOrder @ProductId = @0, @Result = @Result OUTPUT;
        SELECT @Result AS Result;`,
@@ -136,7 +151,7 @@ export class OrdersRepository {
   async list(
     params: ListOrdersParams,
   ): Promise<{ rows: RawOrderListRow[]; total: number }> {
-    const rows: RawOrderListRow[] = await this.dataSource.query(
+    const rows = await this.dataSource.query<RawOrderListRow[]>(
       `EXEC dbo.usp_Order_ListByCustomer @CustomerId = @0, @Status = @1, @Page = @2, @Limit = @3,
         @SortColumn = @4, @SortDirection = @5`,
       [

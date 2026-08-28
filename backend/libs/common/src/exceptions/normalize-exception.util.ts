@@ -83,30 +83,22 @@ function fallbackCode(status: number): ErrorCodeOrGeneric {
   }
 }
 
+const STATUS_BY_CODE: Record<string, number> = {
+  [ErrorCode.VALIDATION_ERROR]: 400,
+  [ErrorCode.UNAUTHORIZED]: 401,
+  [ErrorCode.FORBIDDEN_ROLE]: 403,
+  [ErrorCode.ORDER_NOT_FOUND]: 404,
+  [ErrorCode.PRODUCT_NOT_FOUND]: 404,
+  [ErrorCode.USER_NOT_FOUND]: 404,
+  [ErrorCode.DUPLICATE_EMAIL]: 409,
+  [ErrorCode.DUPLICATE_SKU]: 409,
+  [ErrorCode.INSUFFICIENT_STOCK]: 409,
+  [ErrorCode.INVALID_TRANSITION]: 409,
+  [ErrorCode.ALREADY_PROCESSED]: 422,
+  [ErrorCode.RATE_LIMITED]: 429,
+  [ErrorCode.SERVICE_UNAVAILABLE]: 503,
+};
+
 function fallbackStatus(code: string): number {
-  switch (code) {
-    case ErrorCode.VALIDATION_ERROR:
-      return 400;
-    case ErrorCode.UNAUTHORIZED:
-      return 401;
-    case ErrorCode.FORBIDDEN_ROLE:
-      return 403;
-    case ErrorCode.ORDER_NOT_FOUND:
-    case ErrorCode.PRODUCT_NOT_FOUND:
-    case ErrorCode.USER_NOT_FOUND:
-      return 404;
-    case ErrorCode.DUPLICATE_EMAIL:
-    case ErrorCode.DUPLICATE_SKU:
-    case ErrorCode.INSUFFICIENT_STOCK:
-    case ErrorCode.INVALID_TRANSITION:
-      return 409;
-    case ErrorCode.ALREADY_PROCESSED:
-      return 422;
-    case ErrorCode.RATE_LIMITED:
-      return 429;
-    case ErrorCode.SERVICE_UNAVAILABLE:
-      return 503;
-    default:
-      return 500;
-  }
+  return STATUS_BY_CODE[code] ?? 500;
 }

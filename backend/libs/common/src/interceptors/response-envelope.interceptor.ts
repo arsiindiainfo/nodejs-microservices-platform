@@ -21,6 +21,6 @@ export class ResponseEnvelopeInterceptor implements NestInterceptor {
   ): Observable<ApiSuccessResponse<unknown>> {
     return next
       .handle()
-      .pipe(map((data) => ({ success: true as const, data })));
+      .pipe(map((data: unknown) => ({ success: true as const, data })));
   }
 }

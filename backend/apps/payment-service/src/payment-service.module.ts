@@ -13,7 +13,11 @@ import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validationSchema: envSchema }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envSchema,
+      envFilePath: 'apps/payment-service/.env',
+    }),
     JwtCommonModule,
     HealthModule,
     PaymentsModule,

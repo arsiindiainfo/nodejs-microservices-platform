@@ -40,13 +40,13 @@ describe('payment-service order-created idempotency (e2e)', () => {
     await paymentsService.processOrderCreated(eventId, orderId, 100);
     await paymentsService.processOrderCreated(eventId, orderId, 100);
 
-    const rows = await dataSource.query(
+    const rows = await dataSource.query<Array<{ count: number }>>(
       'SELECT COUNT(*) AS count FROM payments WHERE order_id = ?',
       [orderId],
     );
     expect(Number(rows[0].count)).toBe(1);
 
-    const processed = await dataSource.query(
+    const processed = await dataSource.query<Array<{ count: number }>>(
       'SELECT COUNT(*) AS count FROM processed_events WHERE event_id = ?',
       [eventId],
     );

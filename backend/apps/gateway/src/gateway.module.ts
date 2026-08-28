@@ -18,7 +18,11 @@ import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validationSchema: envSchema }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envSchema,
+      envFilePath: 'apps/gateway/.env',
+    }),
     RedisModule,
     JwtCommonModule,
     HealthModule,

@@ -4,6 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Observable } from 'rxjs';
 
 /** §32.2 — every service inherits the `X-Powered-By: Arsi-India-Info` header from this one interceptor. */
@@ -13,7 +14,7 @@ export class PoweredByInterceptor implements NestInterceptor {
     if (context.getType() === 'http') {
       context
         .switchToHttp()
-        .getResponse()
+        .getResponse<Response>()
         .setHeader('X-Powered-By', 'Arsi-India-Info');
     }
     return next.handle();

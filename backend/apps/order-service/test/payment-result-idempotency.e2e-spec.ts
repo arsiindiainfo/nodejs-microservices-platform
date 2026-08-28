@@ -35,23 +35,24 @@ describe('order-service payment-result idempotency (e2e)', () => {
   });
 
   it('applies the same PAYMENT_SUCCEEDED event exactly once', async () => {
-    const [{ OrderId: orderId }] = await dataSource.query(
+    const created = await dataSource.query<Array<{ OrderId: number }>>(
       `INSERT INTO dbo.Orders (CustomerId, Status, TotalAmount) OUTPUT INSERTED.OrderId
        VALUES (@0, 'AWAITING_PAYMENT', 42.00)`,
       [randomUUID()],
     );
+    const orderId = created[0].OrderId;
     const eventId = randomUUID();
 
     await ordersService.applyPaymentResult(eventId, orderId, 'SUCCEEDED');
     await ordersService.applyPaymentResult(eventId, orderId, 'SUCCEEDED');
 
-    const [order] = await dataSource.query(
+    const orders = await dataSource.query<Array<{ Status: string }>>(
       'SELECT Status FROM dbo.Orders WHERE OrderId = @0',
       [orderId],
     );
-    expect(order.Status).toBe('PAID');
+    expect(orders[0].Status).toBe('PAID');
 
-    const processedCount = await dataSource.query(
+    const processedCount = await dataSource.query<Array<{ count: number }>>(
       'SELECT COUNT(*) AS count FROM dbo.ProcessedEvents WHERE EventId = @0',
       [eventId],
     );

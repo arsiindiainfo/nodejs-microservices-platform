@@ -31,16 +31,18 @@ export class PaymentOutboxPublisherService extends OutboxPublisherBase {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const claimed: ClaimedRow[] = await queryRunner.query(
+      const claimed = (await queryRunner.query(
         'CALL sp_outbox_claim_batch(?)',
         [20],
-      );
-      const rows = (claimed[0] ?? claimed) as unknown as ClaimedRow[];
+      )) as ClaimedRow[] | [ClaimedRow[], unknown];
+      const rows = Array.isArray(claimed[0])
+        ? claimed[0]
+        : (claimed as ClaimedRow[]);
 
       for (const row of rows) {
-        const payload =
+        const payload: object =
           typeof row.payload === 'string'
-            ? JSON.parse(row.payload)
+            ? (JSON.parse(row.payload) as object)
             : row.payload;
         const envelope = wrapEvent(
           deriveEventId(ServiceName.PAYMENT_SERVICE, row.id),

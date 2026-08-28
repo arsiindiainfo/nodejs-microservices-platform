@@ -6,4 +6,4 @@ export interface JwtPayload {
   role: Role;
 }
 
-export interface AuthenticatedUser extends JwtPayload {}
+export type AuthenticatedUser = JwtPayload;

@@ -11,7 +11,11 @@ import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validationSchema: envSchema }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envSchema,
+      envFilePath: 'apps/auth-service/.env',
+    }),
     JwtCommonModule,
     HealthModule,
     AuthModule,
