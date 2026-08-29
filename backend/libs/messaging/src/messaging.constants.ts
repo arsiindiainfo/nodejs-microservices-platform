@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 /** §11.2 diagram / §23.7 queue-depth panel — the fixed topic/queue topology for this platform. */
 export const SNS_TOPICS = {
   ORDER_EVENTS: 'order-events',

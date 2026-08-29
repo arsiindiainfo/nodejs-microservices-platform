@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 /** §16 Error Code Catalog */
 export enum ErrorCode {
   VALIDATION_ERROR = 'VALIDATION_ERROR',

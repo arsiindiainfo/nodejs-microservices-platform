@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';

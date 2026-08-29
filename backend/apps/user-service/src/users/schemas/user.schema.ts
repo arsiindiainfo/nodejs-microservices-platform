@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { randomUUID } from 'crypto';

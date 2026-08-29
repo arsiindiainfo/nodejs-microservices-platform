@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { OrderStatus } from '../constants/order-status.enum';
 
 export interface OrderItemView {

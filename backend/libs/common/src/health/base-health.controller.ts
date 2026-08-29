@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { Get } from '@nestjs/common';
 import {
   HealthCheck,

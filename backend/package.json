@@ -13,11 +13,17 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/gateway/main",
     "lint": "eslint \"{apps,libs,test}/**/*.ts\" --fix",
+    "lint:ci": "eslint \"{apps,libs,test}/**/*.ts\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/gateway/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/gateway/test/jest-e2e.json",
+    "test:integration": "jest --config ./test/jest-integration.json --runInBand",
+    "test:saga": "jest --config ./test/jest-integration.json --runInBand --testPathPattern=saga",
+    "test:chaos": "jest --config ./test/jest-integration.json --runInBand --testPathPattern=chaos-lite",
+    "license-header-check": "node scripts/check-license-headers.js",
+    "license-header-fix": "node scripts/check-license-headers.js --fix"
   },
   "dependencies": {
     "@aws-sdk/client-sns": "^3.1120.0",
@@ -65,6 +71,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.0.0",
     "jest": "^30.0.0",
+    "mongodb": "^7.6.0",
     "prettier": "^3.4.2",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",

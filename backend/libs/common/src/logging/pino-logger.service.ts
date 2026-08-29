@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { LoggerService } from '@nestjs/common';
 import pino, { Logger as Pino } from 'pino';
 

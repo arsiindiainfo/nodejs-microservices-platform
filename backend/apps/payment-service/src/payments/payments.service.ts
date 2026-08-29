@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { Injectable, Logger } from '@nestjs/common';
 import { OrderNotFoundException } from '@app/common';
 import type { PaymentStatusView } from '@app/common';

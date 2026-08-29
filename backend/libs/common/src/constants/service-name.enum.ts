@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 export enum ServiceName {
   GATEWAY = 'gateway',
   AUTH_SERVICE = 'auth-service',

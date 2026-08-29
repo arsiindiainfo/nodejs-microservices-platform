@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { Role } from '../constants/role.enum';
 
 /** What user-service returns over TCP — never includes passwordHash (§6.2). */

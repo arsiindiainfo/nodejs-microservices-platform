@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 /**
  * TCP MessagePattern names shared between a service's controller and every
  * caller — kept in one place so a rename is a compile error at every call

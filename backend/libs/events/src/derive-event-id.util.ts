@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { v5 as uuidv5 } from 'uuid';
 
 /**

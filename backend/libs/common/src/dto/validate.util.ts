@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ValidationErrorException } from '../exceptions/domain.exceptions';

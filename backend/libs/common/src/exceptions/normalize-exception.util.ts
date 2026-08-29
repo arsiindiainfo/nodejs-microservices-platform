@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { ErrorCode } from '../constants/error-code.enum';

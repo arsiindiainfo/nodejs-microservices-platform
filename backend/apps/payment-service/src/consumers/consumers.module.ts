@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { Module } from '@nestjs/common';
 import { PaymentsModule } from '../payments/payments.module';
 import { OrderCreatedConsumer } from './order-created.consumer';

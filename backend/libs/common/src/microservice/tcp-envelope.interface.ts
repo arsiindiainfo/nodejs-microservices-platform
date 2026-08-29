@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 /**
  * Every synchronous TCP call between services carries the caller's JWT and
  * correlation id as explicit metadata — TCP has no HTTP-style headers, and

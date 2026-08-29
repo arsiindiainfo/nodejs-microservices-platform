@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - gateway
+          - auth-service
+          - user-service
+          - product-service
+          - order-service
+          - payment-service
+          - notification-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      # Only needs to run once, but cheap enough to run per matrix leg too;
+      # kept on the gateway leg only to avoid redundant duplicate failures.
+      - name: Lint
+        if: matrix.app == 'gateway'
+        run: npm run lint:ci
+
+      - name: License header check
+        if: matrix.app == 'gateway'
+        run: npm run license-header-check
+
+      - name: Type-check the whole monorepo
+        if: matrix.app == 'gateway'
+        run: npx tsc --noEmit -p tsconfig.build.json --skipLibCheck
+
+      - name: Unit tests
+        if: matrix.app == 'gateway'
+        run: npm test -- --ci
+
+      - name: Build ${{ matrix.app }} (Nest CLI / webpack)
+        run: npx nest build ${{ matrix.app }}
+
+      - name: Build ${{ matrix.app }} Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: infrastructure/docker/Dockerfile
+          build-args: |
+            APP_NAME=${{ matrix.app }}
+          push: false
+          tags: demotech/${{ matrix.app }}:ci
+
+  # The cross-service saga test and the chaos-lite test (docs/testing.md)
+  # need the full docker-compose stack — including `docker kill`/`docker
+  # start` control over a running container for chaos-lite — which isn't
+  # available in a standard hosted runner without additional setup. They're
+  # run locally before a release rather than gated on here; see
+  # docs/contributing.md's "Required checks" section for the reasoning.

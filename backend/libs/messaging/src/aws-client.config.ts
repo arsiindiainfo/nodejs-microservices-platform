@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { ConfigService } from '@nestjs/config';
 import { SNSClientConfig } from '@aws-sdk/client-sns';
 import { SQSClientConfig } from '@aws-sdk/client-sqs';

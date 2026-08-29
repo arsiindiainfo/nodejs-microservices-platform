@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 /** §11.1 Order status */
 export enum OrderStatus {
   PENDING = 'PENDING',

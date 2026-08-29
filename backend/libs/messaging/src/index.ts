@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 export * from './messaging.constants';
 export * from './aws-client.config';
 export * from './sns-publisher.service';

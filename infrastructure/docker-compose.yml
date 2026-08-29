@@ -226,6 +226,23 @@ services:
       NOTIFICATION_SVC_ORDER_QUEUE_URL: http://localstack:4566/000000000000/notification-svc-order-queue
       NOTIFICATION_SVC_PAYMENT_QUEUE_URL: http://localstack:4566/000000000000/notification-svc-payment-queue
 
+  # One-shot: demo admin/customer accounts + product catalog (§28), so a
+  # reviewer can place an order immediately after `docker compose up`.
+  seed:
+    image: node:20-alpine
+    container_name: demotech-seed
+    depends_on:
+      gateway:
+        condition: service_started
+    working_dir: /seed
+    volumes:
+      - ./seed:/seed
+    environment:
+      GATEWAY_URL: http://gateway:3000
+      USER_SERVICE_MONGO_URI: mongodb://demotech:${MONGO_ROOT_PASSWORD:-DemoTech!Mongo2026}@mongo:27017/user_service?authSource=admin
+    command: sh -c "npm install --omit=dev --no-audit --no-fund && node seed.js"
+    restart: "no"
+
 volumes:
   mssql-data:
   mysql-data:

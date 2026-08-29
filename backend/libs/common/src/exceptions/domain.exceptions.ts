@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
 import { ErrorCode } from '../constants/error-code.enum';
 import { ApiException } from './api.exception';
 

@@ -1,0 +1,20 @@
+# Local secrets — only .env.example files are committed.
+.env
+.env.local
+infrastructure/.env
+
+# Dependencies (each app/lib has its own node_modules; this also covers
+# infrastructure/seed/node_modules, written to the host via its bind mount
+# when the `seed` compose job runs `npm install`).
+node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.sublime-workspace

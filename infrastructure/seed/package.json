@@ -1,0 +1,11 @@
+{
+  "name": "demotech-seed",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One-shot seed job: demo admin/customer accounts + a small product catalog (§28).",
+  "type": "commonjs",
+  "main": "seed.js",
+  "dependencies": {
+    "mongodb": "^6.10.0"
+  }
+}
