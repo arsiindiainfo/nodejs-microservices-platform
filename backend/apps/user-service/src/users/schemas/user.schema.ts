@@ -40,10 +40,15 @@ export class User {
   @Prop({ required: true })
   passwordHash: string;
 
-  @Prop({ required: true, enum: Role, default: Role.CUSTOMER })
+  @Prop({ type: String, required: true, enum: Role, default: Role.CUSTOMER })
   role: Role;
 
-  @Prop({ required: true, enum: UserStatus, default: UserStatus.ACTIVE })
+  @Prop({
+    type: String,
+    required: true,
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
   status: UserStatus;
 
   createdAt?: Date;

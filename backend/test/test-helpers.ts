@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
 export const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:3000';
 const USER_SERVICE_MONGO_URI =
@@ -11,7 +11,11 @@ export function sleep(ms: number): Promise<void> {
 
 interface ApiResult<T = any> {
   status: number;
-  json: { success: boolean; data?: T; error?: { code: string; message: string } };
+  json: {
+    success: boolean;
+    data?: T;
+    error?: { code: string; message: string };
+  };
 }
 
 export async function api<T = any>(
@@ -38,19 +42,27 @@ export async function api<T = any>(
  * job uses.
  */
 export async function promoteToAdmin(email: string): Promise<void> {
-  const client = new MongoClient(USER_SERVICE_MONGO_URI);
+  const connection = await mongoose
+    .createConnection(USER_SERVICE_MONGO_URI)
+    .asPromise();
   try {
-    await client.connect();
-    const result = await client.db().collection('users').updateOne({ email }, { $set: { role: 'ADMIN' } });
+    const result = await connection
+      .collection('users')
+      .updateOne({ email }, { $set: { role: 'ADMIN' } });
     if (result.matchedCount === 0) {
-      throw new Error(`No user found for ${email} to promote — did registration succeed?`);
+      throw new Error(
+        `No user found for ${email} to promote — did registration succeed?`,
+      );
     }
   } finally {
-    await client.close();
+    await connection.close();
   }
 }
 
-export async function waitForGateway(retries = 60, delayMs = 3000): Promise<void> {
+export async function waitForGateway(
+  retries = 60,
+  delayMs = 3000,
+): Promise<void> {
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
       const res = await fetch(`${GATEWAY_URL}/api/v1/about`);

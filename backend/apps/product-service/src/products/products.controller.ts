@@ -1,13 +1,15 @@
 // Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
-import { Controller, UseFilters } from '@nestjs/common';
+import { Controller, UseFilters, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateProductDto,
+  JwtVerificationGuard,
   PaginationQueryDto,
   ProductIdDto,
   ReserveStockDto,
   Role,
   Roles,
+  RolesGuard,
   RpcExceptionFilter,
   PRODUCT_PATTERNS,
   UpdateProductDto,
@@ -22,6 +24,7 @@ import type {
 import { ProductsService } from './products.service';
 
 @UseFilters(RpcExceptionFilter)
+@UseGuards(JwtVerificationGuard, RolesGuard)
 @Controller()
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}

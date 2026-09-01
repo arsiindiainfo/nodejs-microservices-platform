@@ -1,12 +1,14 @@
 // Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
-import { Controller, UseFilters } from '@nestjs/common';
+import { Controller, UseFilters, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   AUTH_PATTERNS,
+  JwtVerificationGuard,
   LoginDto,
   Public,
   RefreshTokenDto,
   RegisterDto,
+  RolesGuard,
   RpcExceptionFilter,
   validateDto,
 } from '@app/common';
@@ -14,6 +16,7 @@ import type { AuthSession, TcpEnvelope, TokenPair } from '@app/common';
 import { AuthService } from './auth.service';
 
 @UseFilters(RpcExceptionFilter)
+@UseGuards(JwtVerificationGuard, RolesGuard)
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

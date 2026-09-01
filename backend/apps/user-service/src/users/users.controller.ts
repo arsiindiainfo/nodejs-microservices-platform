@@ -1,10 +1,12 @@
 // Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
-import { Controller, UseFilters } from '@nestjs/common';
+import { Controller, UseFilters, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
+  JwtVerificationGuard,
   LoginDto,
   Public,
   RegisterDto,
+  RolesGuard,
   RpcExceptionFilter,
   USER_PATTERNS,
   UserIdDto,
@@ -14,6 +16,7 @@ import type { TcpEnvelope, UserProfile } from '@app/common';
 import { UsersService } from './users.service';
 
 @UseFilters(RpcExceptionFilter)
+@UseGuards(JwtVerificationGuard, RolesGuard)
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

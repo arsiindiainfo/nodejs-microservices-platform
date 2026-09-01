@@ -25,8 +25,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     const { status, body } = normalizeToErrorBody(exception);
     if (status >= 500) {
+      const rawMessage =
+        exception instanceof Error ? exception.message : String(exception);
       this.logger.error(
-        `[${correlationId ?? '-'}] ${request.method} ${request.originalUrl} -> ${status} ${body.code}: ${body.message}`,
+        `[${correlationId ?? '-'}] ${request.method} ${request.originalUrl} -> ${status} ${rawMessage}`,
         exception instanceof Error ? exception.stack : undefined,
       );
     } else {

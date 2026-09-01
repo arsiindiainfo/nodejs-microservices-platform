@@ -22,7 +22,16 @@ export class NotificationsService {
     type: NotificationType,
     message: string,
   ): Promise<void> {
-    await this.notificationModel.create({ userId, type, message, read: false });
+    // Order/payment events carry a customerId that may have round-tripped
+    // through SQL Server, which upper-cases UNIQUEIDENTIFIER values — the
+    // JWT-issued userId used to query notifications back is always
+    // lower-cased, so this must be normalized at the write site.
+    await this.notificationModel.create({
+      userId: userId.toLowerCase(),
+      type,
+      message,
+      read: false,
+    });
   }
 
   async list(

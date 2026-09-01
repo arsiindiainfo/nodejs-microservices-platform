@@ -21,7 +21,11 @@ describe('chaos-lite: payment-service restart mid-order (e2e)', () => {
     await waitForGateway();
 
     const unique = Date.now();
-    const admin = { name: 'Chaos Admin', email: `chaos-admin-${unique}@test.local`, password: 'ChaosAdmin!2026' };
+    const admin = {
+      name: 'Chaos Admin',
+      email: `chaos-admin-${unique}@test.local`,
+      password: 'ChaosAdmin!2026',
+    };
     const customer = {
       name: 'Chaos Customer',
       email: `chaos-customer-${unique}@test.local`,
@@ -30,22 +34,33 @@ describe('chaos-lite: payment-service restart mid-order (e2e)', () => {
 
     await api('/api/v1/auth/register', { method: 'POST', body: admin });
     await promoteToAdmin(admin.email);
-    const adminLogin = await api<{ accessToken: string }>('/api/v1/auth/login', {
-      method: 'POST',
-      body: { email: admin.email, password: admin.password },
-    });
+    const adminLogin = await api<{ accessToken: string }>(
+      '/api/v1/auth/login',
+      {
+        method: 'POST',
+        body: { email: admin.email, password: admin.password },
+      },
+    );
 
     await api('/api/v1/auth/register', { method: 'POST', body: customer });
-    const customerLogin = await api<{ accessToken: string }>('/api/v1/auth/login', {
-      method: 'POST',
-      body: { email: customer.email, password: customer.password },
-    });
+    const customerLogin = await api<{ accessToken: string }>(
+      '/api/v1/auth/login',
+      {
+        method: 'POST',
+        body: { email: customer.email, password: customer.password },
+      },
+    );
     customerToken = customerLogin.json.data!.accessToken;
 
     const product = await api<{ id: string }>('/api/v1/products', {
       method: 'POST',
       token: adminLogin.json.data!.accessToken,
-      body: { name: `Chaos Widget ${unique}`, sku: `CHAOS-${unique}`, price: 42, stockQty: 10 },
+      body: {
+        name: `Chaos Widget ${unique}`,
+        sku: `CHAOS-${unique}`,
+        price: 42,
+        stockQty: 10,
+      },
     });
     productId = product.json.data!.id;
   });
@@ -67,7 +82,9 @@ describe('chaos-lite: payment-service restart mid-order (e2e)', () => {
 
     let finalStatus: string | undefined;
     for (let attempt = 0; attempt < 60; attempt += 1) {
-      const check = await api<{ status: string }>(`/api/v1/orders/${orderId}`, { token: customerToken });
+      const check = await api<{ status: string }>(`/api/v1/orders/${orderId}`, {
+        token: customerToken,
+      });
       finalStatus = check.json.data?.status;
       if (finalStatus === 'PAID' || finalStatus === 'PAYMENT_FAILED') break;
       await sleep(2000);

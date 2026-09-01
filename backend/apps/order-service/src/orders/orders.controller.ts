@@ -1,14 +1,16 @@
 // Copyright (c) 2026 Arsi India Info. Licensed under the MIT License.
-import { Controller, UseFilters } from '@nestjs/common';
+import { Controller, UseFilters, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateOrderDto,
+  JwtVerificationGuard,
   OrderIdDto,
   OrderListQueryDto,
   ORDER_PATTERNS,
   ProductIdDto,
   Public,
   Role,
+  RolesGuard,
   RpcExceptionFilter,
   validateDto,
 } from '@app/common';
@@ -26,6 +28,7 @@ interface AuthenticatedEnvelope<T> extends TcpEnvelope<T> {
 }
 
 @UseFilters(RpcExceptionFilter)
+@UseGuards(JwtVerificationGuard, RolesGuard)
 @Controller()
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}

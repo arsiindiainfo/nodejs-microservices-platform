@@ -108,7 +108,13 @@ export class OrdersService {
     requester: RequestingUser,
   ): Promise<OrderDetail> {
     const row = await this.ordersRepository.getById(orderId);
-    if (!row || (!requester.isAdmin && row.CustomerId !== requester.userId)) {
+    // SQL Server returns UNIQUEIDENTIFIER values upper-cased; the JWT-issued
+    // customerId is lower-cased, so this must compare case-insensitively.
+    if (
+      !row ||
+      (!requester.isAdmin &&
+        row.CustomerId.toLowerCase() !== requester.userId.toLowerCase())
+    ) {
       throw new OrderNotFoundException(orderId);
     }
     const items: OrderItemView[] = row.ItemsJson

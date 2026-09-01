@@ -46,9 +46,14 @@ export function toApiException(
     return error;
   }
   const body = error as Partial<ApiErrorBody> | undefined;
-  if (body && typeof body === 'object' && 'code' in body) {
+  if (
+    body &&
+    typeof body === 'object' &&
+    typeof body.code === 'string' &&
+    (Object.values(ErrorCode) as string[]).includes(body.code)
+  ) {
     return new ApiException(
-      (body.code as ErrorCode) ?? ErrorCode.SERVICE_UNAVAILABLE,
+      body.code as ErrorCode,
       body.message ?? `${fallbackService} did not respond correctly.`,
       body.service ?? fallbackService,
     );
