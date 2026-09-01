@@ -13,6 +13,11 @@ export class RegisterDto {
   @IsString()
   @MinLength(10)
   password: string;
+
+  /** Google reCAPTCHA response token from the client widget (§6.1 — bot mitigation on public auth endpoints). */
+  @IsString()
+  @MinLength(1)
+  recaptchaToken: string;
 }
 
 export class LoginDto {
@@ -21,6 +26,11 @@ export class LoginDto {
 
   @IsString()
   password: string;
+
+  /** Google reCAPTCHA response token from the client widget (§6.1 — bot mitigation on public auth endpoints). */
+  @IsString()
+  @MinLength(1)
+  recaptchaToken: string;
 }
 
 export class RefreshTokenDto {

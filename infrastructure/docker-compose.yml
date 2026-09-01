@@ -142,6 +142,9 @@ services:
       TCP_PORT: 4001
       REDIS_HOST: redis
       USER_SERVICE_HOST: user-service
+      # Real key pair registered at https://www.google.com/recaptcha/admin —
+      # see docs/backend-setup.md's reCAPTCHA section for details.
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-6LfiK6MtAAAAAOA2orFwA0XHas6wyTER4fFIIyVA}
 
   user-service:
     build: { context: ../backend, dockerfile: ../infrastructure/docker/Dockerfile, args: { APP_NAME: user-service } }

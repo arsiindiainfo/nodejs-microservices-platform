@@ -20,6 +20,7 @@ import type {
   TokenPair,
   UserProfile,
 } from '@app/common';
+import { RecaptchaService } from './recaptcha.service';
 
 const REFRESH_KEY_PREFIX = 'refresh:';
 
@@ -45,6 +46,7 @@ export class AuthService {
     @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly jwtService: JwtService,
+    private readonly recaptcha: RecaptchaService,
     config: ConfigService,
   ) {
     this.refreshTtlSeconds = config.get<number>(
@@ -54,6 +56,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto, meta: TcpMeta): Promise<AuthSession> {
+    await this.recaptcha.verify(dto.recaptchaToken);
     const user = await callTcpService<UserProfile>(
       this.userClient,
       USER_PATTERNS.REGISTER,
@@ -65,6 +68,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, meta: TcpMeta): Promise<AuthSession> {
+    await this.recaptcha.verify(dto.recaptchaToken);
     const user = await callTcpService<UserProfile>(
       this.userClient,
       USER_PATTERNS.VERIFY_CREDENTIALS,

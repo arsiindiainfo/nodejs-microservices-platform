@@ -7,4 +7,5 @@ export const envSchema = Joi.object({
   USER_SERVICE_HOST: Joi.string().default('localhost'),
   USER_SERVICE_TCP_PORT: Joi.number().default(4002),
   JWT_REFRESH_EXPIRES_IN_SECONDS: Joi.number().default(60 * 60 * 24 * 7),
+  RECAPTCHA_SECRET_KEY: Joi.string().required(),
 });

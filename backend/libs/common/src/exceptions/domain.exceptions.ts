@@ -101,3 +101,9 @@ export class ServiceUnavailableException extends ApiException {
     );
   }
 }
+
+export class RecaptchaVerificationException extends ApiException {
+  constructor(message = 'reCAPTCHA verification failed. Please try again.') {
+    super(ErrorCode.RECAPTCHA_FAILED, message);
+  }
+}

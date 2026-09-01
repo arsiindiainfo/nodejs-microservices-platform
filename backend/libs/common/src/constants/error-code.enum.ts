@@ -15,6 +15,7 @@ export enum ErrorCode {
   RATE_LIMITED = 'RATE_LIMITED',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
+  RECAPTCHA_FAILED = 'RECAPTCHA_FAILED',
 }
 
 export const ERROR_CODE_HTTP_STATUS: Record<ErrorCode, number> = {
@@ -32,4 +33,5 @@ export const ERROR_CODE_HTTP_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.RATE_LIMITED]: 429,
   [ErrorCode.SERVICE_UNAVAILABLE]: 503,
   [ErrorCode.INTERNAL_ERROR]: 500,
+  [ErrorCode.RECAPTCHA_FAILED]: 400,
 };

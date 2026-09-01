@@ -98,6 +98,7 @@ const STATUS_BY_CODE: Record<string, number> = {
   [ErrorCode.ALREADY_PROCESSED]: 422,
   [ErrorCode.RATE_LIMITED]: 429,
   [ErrorCode.SERVICE_UNAVAILABLE]: 503,
+  [ErrorCode.RECAPTCHA_FAILED]: 400,
 };
 
 function fallbackStatus(code: string): number {

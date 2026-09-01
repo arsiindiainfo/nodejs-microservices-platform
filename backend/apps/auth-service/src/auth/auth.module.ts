@@ -8,6 +8,7 @@ import {
 } from '@app/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { RecaptchaService } from './recaptcha.service';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { AuthService } from './auth.service';
     ),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, RecaptchaService],
 })
 export class AuthModule {}
